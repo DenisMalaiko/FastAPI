@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 class UserCreate(BaseModel):
     email: str
@@ -13,6 +13,4 @@ class UserOut(BaseModel):
     email: str
     name: str
 
-    class Config:
-        orm_mode = True
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

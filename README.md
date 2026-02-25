@@ -9,3 +9,6 @@
 
 ### Run Migrations
 ```alembic upgrade head```
+
+### Run Tests
+```python -m pytest -q```
