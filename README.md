@@ -12,3 +12,6 @@
 
 ### Run Tests
 ```python -m pytest -q```
+
+### Run Test With Prints
+```pytest -s```

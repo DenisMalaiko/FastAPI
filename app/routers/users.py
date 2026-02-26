@@ -4,7 +4,6 @@ from app.schemas.user import UserOut, UserCreate, UserUpdate
 from app.services.user_service import UserService
 from app.services.deps import get_user_service
 
-
 router = APIRouter()
 
 # Get Users List

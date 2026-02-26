@@ -4,6 +4,8 @@ class UserCreate(BaseModel):
     email: str
     name: str
 
+    model_config = ConfigDict(extra="forbid")
+
 class UserUpdate(BaseModel):
     email: str | None = None
     name: str | None = None
