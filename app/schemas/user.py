@@ -10,6 +10,8 @@ class UserUpdate(BaseModel):
     email: str | None = None
     name: str | None = None
 
+    model_config = ConfigDict(extra="forbid")
+
 class UserOut(BaseModel):
     id: int
     email: str

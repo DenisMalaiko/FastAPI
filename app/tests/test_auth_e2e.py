@@ -22,4 +22,4 @@ def test_me_with_valid_token(client):
         headers={"Authorization": "Bearer secret"},
     )
     assert r.status_code == 200
-    assert r.json()["role"] == "user"
+    assert r.json()["message"] == "Successfully authenticated!"

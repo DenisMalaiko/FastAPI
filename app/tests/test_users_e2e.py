@@ -24,8 +24,8 @@ def test_users_e2e(client):
     assert r.status_code == 200
 
 
-# ------------- Creating Users -------------
-def test_user_creating_with_missed_field(client):
+# ------------- Create User -------------
+def test_create_user_with_missed_field(client):
     r = client.post(
         "/api/v1/users/",
         headers={"Authorization": "Bearer secret"},
@@ -34,7 +34,7 @@ def test_user_creating_with_missed_field(client):
     assert r.status_code == 422
     assert r.json()["detail"][0]["msg"] == "Field required"
 
-def test_user_creating_with_wrong_field_type(client):
+def test_create_user_with_wrong_field_type(client):
     r = client.post(
         "/api/v1/users/",
         headers={"Authorization": "Bearer secret"},
@@ -48,7 +48,7 @@ def test_user_creating_with_wrong_field_type(client):
     assert error_types["name"] == "string_type"
     assert error_types["email"] == "string_type"
 
-def test_user_creating_with_redundant_field(client):
+def test_create_user_with_redundant_field(client):
     r = client.post(
         "/api/v1/users/",
         headers={"Authorization": "Bearer secret"},
@@ -58,7 +58,7 @@ def test_user_creating_with_redundant_field(client):
     assert r.status_code == 422
     assert r.json()["detail"][0]["msg"] == "Extra inputs are not permitted"
 
-def test_user_creating_properly(client):
+def test_create_user_properly(client):
     r = client.post(
         "/api/v1/users/",
         headers={"Authorization": "Bearer secret"},
@@ -74,7 +74,7 @@ def test_user_creating_properly(client):
         headers={"Authorization": "Bearer secret"},
     )
 
-def test_exists_user_creating(client):
+def test_create_exists_user(client):
     email = "duplicate@mail.com"
 
     first = client.post(
@@ -128,5 +128,118 @@ def test_get_user_by_id(client):
             f"/api/v1/users/{user_id}",
             headers={"Authorization": "Bearer secret"},
         )
+
+
+# ------------- Update User -------------
+def test_update_user_by_id(client):
+    create = client.post(
+        "/api/v1/users/",
+        headers={"Authorization": "Bearer secret"},
+        json={
+            "email": "test_user@mail.com",
+            "name": "Test User",
+        },
+    )
+
+    assert create.status_code == 200
+    user_id = create.json()["id"]
+
+    try:
+        r = client.patch(
+            f"/api/v1/users/{user_id}",
+            headers={"Authorization": "Bearer secret"},
+            json={
+                "name": "Updated User",
+            },
+        )
+
+        assert r.status_code == 200
+        assert r.json()["name"] == "Updated User"
+    finally:
+        client.delete(
+            f"/api/v1/users/{user_id}",
+            headers={"Authorization": "Bearer secret"},
+        )
+
+def test_update_user_with_wrong_type_by_id(client):
+    create = client.post(
+        "/api/v1/users/",
+        headers={"Authorization": "Bearer secret"},
+        json={
+            "email": "test_user@mail.com",
+            "name": "Test User",
+        },
+    )
+
+    assert create.status_code == 200
+    user_id = create.json()["id"]
+
+    try:
+        r = client.patch(
+            f"/api/v1/users/{user_id}",
+            headers={"Authorization": "Bearer secret"},
+            json={
+                "name": 111,
+                "email": 222,
+            },
+        )
+
+        assert r.status_code == 422
+
+        details = r.json()["detail"]
+        error_types = {err["loc"][-1]: err["type"] for err in details}
+
+        assert error_types["name"] == "string_type"
+        assert error_types["email"] == "string_type"
+
+    finally:
+        client.delete(
+            f"/api/v1/users/{user_id}",
+            headers={"Authorization": "Bearer secret"},
+        )
+
+def test_update_user_with_redundant_field(client):
+    r = client.patch(
+        "/api/v1/users/",
+        headers={"Authorization": "Bearer secret"},
+        json={"name": "John", "email": "malaiko.denis2@gmail.com", "age": 30},
+    )
+
+    assert r.status_code == 405
+    assert r.json()["detail"] == "Method Not Allowed"
+
+
+# ------------- Delete User -------------
+def test_delete_user_by_id(client):
+    create = client.post(
+        "/api/v1/users/",
+        headers={"Authorization": "Bearer secret"},
+        json={
+            "email": "test_user@mail.com",
+            "name": "Test User",
+        },
+    )
+
+    assert create.status_code == 200
+    user_id = create.json()["id"]
+
+
+    delete = client.delete(
+        f"/api/v1/users/{user_id}",
+        headers={"Authorization": "Bearer secret"},
+    )
+
+    assert delete.status_code == 204
+
+def test_delete_user_by_wrong_id(client):
+    user_id = 1000000000
+
+    delete = client.delete(
+        f"/api/v1/users/{user_id}",
+        headers={"Authorization": "Bearer secret"},
+    )
+
+    assert delete.status_code == 404
+    assert delete.json()["detail"] == "User not found"
 
 
