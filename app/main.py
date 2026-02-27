@@ -5,7 +5,7 @@ from fastapi import FastAPI, Depends
 from app.routers.users import router as users_router
 from app.db.init_db import init_db
 from app.middleware.logger import logger_middleware
-from app.guards.auth import get_current_user
+from app.guards.auth import auth_guard
 
 logging.basicConfig(
     level=logging.WARNING,
@@ -29,7 +29,7 @@ def root():
     return {"message": "API is running"}
 
 @app.get("/me")
-def me(user = Depends(get_current_user)):
+def me(user = Depends(auth_guard)):
     return user
 
 # Register routes
@@ -37,5 +37,5 @@ app.include_router(
     users_router,
     prefix="/api/v1/users",
     tags=["users"],
-    dependencies=[Depends(get_current_user)]
+    dependencies=[Depends(auth_guard)]
 )
